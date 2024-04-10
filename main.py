@@ -1,9 +1,7 @@
 from decimal import Decimal
 import datetime as dt
 
-
 DATE_FORMAT = '%Y-%m-%d'
-
 goods = {}
 
 
@@ -31,7 +29,6 @@ def add_by_note(items, note):
     add(items, title, Decimal(amount), experation_date)
     return items
 
-
 def find(items, needle):
     result = []
     needle = needle.lower()
@@ -46,17 +43,36 @@ def find(items, needle):
 
 
 def amount(items, needle):
-    amount_count = Decimal(0)
+    product_amount = Decimal('0')
     keys = find(items, needle)
     for title in keys:
         for part in items[title]:
-            amount_count += part['amount']
-    return amount_count
+            product_amount += part['amount']
+    return product_amount
 
 
-add(goods, 'Вода', Decimal('2.5'), '2023-12-12')
-add(goods, 'Вода', Decimal('3.5'), '2023-12-12')
-print(amount(goods, 'Вода'))
+def expire(items, in_advance_days=0):
+    result = []
+    today = dt.date.today()
+    for title, parts in items.items():
+        amount = Decimal('0')
+        for part in parts:
+            expiration_date = part.get('expiration_date')
+            if expiration_date:
+                days_until = (expiration_date - today).days
+                if days_until <= in_advance_days:
+                    amount += part['amount']
+                    print(amount)
+        if amount > Decimal('0'):
+            result.append((title, amount))
+    return result
+
+
+add(goods, 'Яйца', Decimal('10'))
+add(goods, 'Хлеб', Decimal('5'), '2024-04-09')
+add(goods, 'Хлеб', Decimal('6'), '2024-04-10')
+add(goods, 'Молоко', Decimal('5'), '2024-04-11')
+print(expire(goods))
 
 
 
